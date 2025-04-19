@@ -1,0 +1,67 @@
+---
+title: "EDS213 Discussion Section"
+author: "Rachel Swick"
+format: html
+---
+
+```{r}
+# Load packages
+library(tidyverse)
+```
+
+```{r}
+# Load data
+crop_calendar <- read_csv(here::here("data/All_data_with_climate.csv"))
+
+production_all_noflag <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_All_Data_NOFLAG.csv"))
+
+production_all <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_All_Data.csv"))
+
+production_area_codes <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_AreaCodes.csv"))
+
+production_elements <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_Elements.csv"))
+
+production_flags <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_Flags.csv"))
+
+production_item_codes <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_ItemCodes.csv"))
+```
+```{r}
+production <- production_all %>%
+  pivot_longer(cols = starts_with("Y") & ends_with("F"), names_to = "Year", values_to = "Flag") %>% 
+  mutate(Year = Year %>% 
+           str_remove("F$")) %>%
+  select(-matches("^Y.*N$")) %>%
+  mutate(Year = as.numeric(Year)) %>% 
+  pivot_longer(cols = starts_with("Y") , names_to = "Year", values_to = "Amount")
+  
+  
+ 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
