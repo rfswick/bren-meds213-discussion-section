@@ -25,19 +25,26 @@ production_flags <- read_csv(here::here("data/Production_Crops_Livestock_E_All_D
 
 production_item_codes <- read_csv(here::here("data/Production_Crops_Livestock_E_All_Data/Production_Crops_Livestock_E_ItemCodes.csv"))
 ```
+
+
 ```{r}
-production <- production_all %>%
+# Select year and flag columns
+flags_df <- production_all %>%
   pivot_longer(cols = starts_with("Y") & ends_with("F"), names_to = "Year", values_to = "Flag") %>% 
   mutate(Year = Year %>% 
-           str_remove("F$")) %>%
-  select(-matches("^Y.*N$")) %>%
-  mutate(Year = as.numeric(Year)) %>% 
-  pivot_longer(cols = starts_with("Y") , names_to = "Year", values_to = "Amount")
-  
-  
- 
-```
+           str_remove("F$")) %>% 
+  select(c("Flag"))
 
+# Pivot year columns to columns `Year` and `Amount`
+production_df <- production_all_noflag %>% 
+ pivot_longer(cols = starts_with("Y") , names_to = "Year", values_to = "Amount")
+
+# Bind flag columns to production dataframe
+production_clean <- cbind(production_df, flags_df) %>% 
+  mutate(Year = Year %>% 
+           str_remove("Y"))
+
+```
 
 
 
