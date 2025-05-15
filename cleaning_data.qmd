@@ -8,6 +8,7 @@ format: html
 # Load packages
 library(tidyverse)
 library(janitor)
+library(lubridate)
 ```
 
 ```{r}
@@ -37,7 +38,14 @@ crop_calendar_clean = crop_calendar %>%
     TRUE ~ crop
   )) %>% 
   # filter out other and multiple
-  filter(crop != "Other" & crop != "Multiple")
+  filter(crop != "Other" & crop != "Multiple") %>% 
+  select(c(data_id, location, crop, plant_start, plant_start_date, plant_end, plant_end_date, plant_median,
+           plant_range, harvest_start, harvest_start_date, harvest_end, harvest_end_date, harvest_median,
+           harvest_range, source, tot_days, harvested_area)) %>% 
+  filter(if_all(ends_with("_date"), ~ !is.na(.))) %>% 
+  # Using 2010, the year the data set was last updated, as a placeholder to allow easier graphing
+  mutate(across(ends_with("_date"), ~ mdy(paste0(.x, "-2010"))))
+  
 
 print(unique(crop_calendar_clean$crop))
 ```
@@ -59,12 +67,33 @@ production_clean <- cbind(production_df, flags_df) %>%
   mutate(Year = Year %>% 
            str_remove("Y")) %>% 
   clean_names() %>% 
-  filter(str_detect(item, str_c(unique(crop_calendar_clean$crop), collapse = "|")))
+  filter(str_detect(item, str_c(unique(crop_calendar_clean$crop), collapse = "|"))) %>% 
+  mutate(item = case_when(
+    item == "Rapeseed or canola oil, crude" ~ "Rapeseed",
+    item == "Sunflower-seed oil, crude" ~ "Sunflower",
+    item == "Sunflower seed" ~ "Sunflower",
+    item == "Maize (corn)" ~ "Maize",
+    item == "Cotton seed" ~ "Cotton",
+    item == "Cottonseed oil" ~ "Cotton",
+    item == "Cotton lint, ginned" ~ "Cotton",
+    item == "Pulses, Total" ~ "Pulses",
+    item == "Cassava, fresh" ~ "Cassava",
+    item == "Cassava leaves" ~ "Cassava",
+    item == "Groundnuts, excluding shelled" ~ "Groundnuts",
+    TRUE ~ item
+  ))
          
 print(unique(production_clean$item))
 
 ```
 
+```{r}
+# Save crop calendar clean data
+write.csv(crop_calendar_clean, "clean_data/crop_calendar_clean.csv", row.names = FALSE)
+
+# Save production clean data
+write.csv(production_clean, "clean_data/production_clean.csv", row.names = FALSE)
+```
 
 
 
